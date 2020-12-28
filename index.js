@@ -2,7 +2,6 @@ const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const morgan = require('morgan');
 const config = require('./utils/config');
 const logger = require('./utils/logger');
 
@@ -29,12 +28,7 @@ mongoose.connect(mongoUrl, {
 app.use(cors());
 app.use(express.json());
 
-morgan.token('req-body', (req) => JSON.stringify(req.body));
-app.use(
-  morgan(
-    ':method :url :status :res[content-length] - :response-time ms :req-body',
-  ),
-);
+app.use(logger.reqDetail);
 
 app.get('/api/blogs', (request, response) => {
   Blog.find({}).then((blogs) => {
