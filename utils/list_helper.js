@@ -5,4 +5,20 @@ const totalLikes = (blogs) => {
   }
   return blogs.reduce((sum, blog) => sum + blog.likes, 0);
 };
-module.exports = { dummy, totalLikes };
+const favoriteBlog = (blogs) => {
+  if (blogs.length === 0) {
+    return {};
+  }
+  const blogMaxLikes = blogs.reduce((max, blog) => {
+    if (blog.likes > max.likes) {
+      return blog;
+    }
+    return max;
+  }, blogs[0]);
+  return {
+    title: blogMaxLikes.title,
+    author: blogMaxLikes.author,
+    likes: blogMaxLikes.likes,
+  };
+};
+module.exports = { dummy, totalLikes, favoriteBlog };
