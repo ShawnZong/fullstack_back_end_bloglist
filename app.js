@@ -1,9 +1,9 @@
-const config = require('./utils/config');
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const config = require('./utils/config');
+const requestLogger = require('./utils/middleware');
 const blogsRouter = require('./controllers/blogs');
-const logger = require('./utils/logger');
 
 const app = express();
 
@@ -18,9 +18,7 @@ mongoose.connect(mongoUrl, {
 
 app.use(cors());
 app.use(express.json());
-
-app.use(logger.reqDetail);
-
 app.use('/api', blogsRouter);
+app.use(requestLogger);
 
-module.exports = { app };
+module.exports = app;
