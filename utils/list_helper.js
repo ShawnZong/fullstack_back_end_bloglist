@@ -1,4 +1,5 @@
 const lodash = require('lodash');
+
 const dummy = (blogs) => 1;
 const totalLikes = (blogs) => {
   if (blogs.length === 0) {
@@ -32,9 +33,29 @@ const mostBlogs = (blogs) => {
   lodash.forIn(countBlogsOfAuthorTmp, (value, key) => {
     countBlogsOfAuthor.push({ author: key, blogs: value });
   });
-
-  console.log(countBlogsOfAuthor);
   return lodash.maxBy(countBlogsOfAuthor, 'blogs');
 };
 
-module.exports = { dummy, totalLikes, favoriteBlog, mostBlogs };
+const mostLikes = (blogs) => {
+  const authorWithLikesTmp = lodash.reduce(
+    blogs,
+    (result, blog) => {
+      result[blog.author] = (result[blog.author] || 0) + blog.likes;
+      return result;
+    },
+    {},
+  );
+  const authorWithLikes = [];
+  lodash.forIn(authorWithLikesTmp, (value, key) => {
+    authorWithLikes.push({ author: key, likes: value });
+  });
+
+  return lodash.maxBy(authorWithLikes, 'likes');
+};
+module.exports = {
+  dummy,
+  totalLikes,
+  favoriteBlog,
+  mostBlogs,
+  mostLikes,
+};
