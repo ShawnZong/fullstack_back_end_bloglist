@@ -38,58 +38,77 @@ describe('api test when feed in some initial blogs', () => {
   });
 });
 
-describe('api test, post a blog', () => {
-  test('post a new blog', async () => {
-    const newBlog = {
-      title: 'React patterns',
-      author: 'Michael Chan',
-      url: 'https://reactpatterns.com/',
-      likes: 7,
-    };
+describe('single api test', () => {
+  describe('api test, post a blog', () => {
+    test('post a new blog', async () => {
+      const newBlog = {
+        title: 'React patterns',
+        author: 'Michael Chan',
+        url: 'https://reactpatterns.com/',
+        likes: 7,
+      };
 
-    await api
-      .post('/api/blogs')
-      .send(newBlog)
-      .expect(201)
-      .expect('Content-Type', /application\/json/);
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/);
 
-    const blogs = await listHelper.blogsInDB();
-    expect(blogs.length).toBe(listHelper.initialBlogs.length + 1);
+      const blogs = await listHelper.blogsInDB();
+      expect(blogs.length).toBe(listHelper.initialBlogs.length + 1);
 
-    const titles = blogs.map((blog) => blog.title);
-    expect(titles).toContain('React patterns');
+      const titles = blogs.map((blog) => blog.title);
+      expect(titles).toContain('React patterns');
+    });
+
+    test('default likes should be 0', async () => {
+      const newBlog = {
+        title: 'React patterns',
+        author: 'Michael Chan',
+        url: 'https://reactpatterns.com/',
+      };
+      const response = await api.post('/api/blogs').send(newBlog);
+      expect(response.body.likes).toBe(0);
+    });
+
+    test('title and url are required', async () => {
+      const newBlog = {
+        url: 'https://reactpatterns.com/',
+      };
+      await api.post('/api/blogs').send(newBlog).expect(400);
+    });
   });
 
-  test('default likes should be 0', async () => {
-    const newBlog = {
-      title: 'React patterns',
-      author: 'Michael Chan',
-      url: 'https://reactpatterns.com/',
-    };
-    const response = await api.post('/api/blogs').send(newBlog);
-    expect(response.body.likes).toBe(0);
+  describe('api test delete a blog', () => {
+    test('delete the first blog', async () => {
+      const blogsBefore = await listHelper.blogsInDB();
+      const firstBlog = lodash.first(blogsBefore);
+      await api.delete(`/api/blogs/${firstBlog.id}`);
+      expect(204);
+
+      const blogsAfter = await listHelper.blogsInDB();
+      expect(blogsAfter.length).toBe(listHelper.initialBlogs.length - 1);
+
+      const titles = blogsAfter.map((tmp) => tmp.title);
+      expect(titles).not.toContain(firstBlog.title);
+    });
   });
+  describe('update a blog', () => {
+    test('update likes', async () => {
+      const blogsBefore = await listHelper.blogsInDB();
+      const tmpBlog = lodash.first(blogsBefore);
+      const newBlog = {
+        title: tmpBlog.title,
+        author: tmpBlog.author,
+        url: tmpBlog.url,
+        likes: 666,
+      };
+      await api.put(`/api/blogs/${tmpBlog.id}`).send(newBlog).expect(200);
 
-  test('title and url are required', async () => {
-    const newBlog = {
-      url: 'https://reactpatterns.com/',
-    };
-    await api.post('/api/blogs').send(newBlog).expect(400);
-  });
-});
-
-describe.only('api test delete a blog', () => {
-  test('delete the first blog', async () => {
-    const blogsBefore = await listHelper.blogsInDB();
-    const firstBlog = lodash.first(blogsBefore);
-    await api.delete(`/api/blogs/${firstBlog.id}`);
-    expect(204);
-
-    const blogsAfter = await listHelper.blogsInDB();
-    expect(blogsAfter.length).toBe(listHelper.initialBlogs.length - 1);
-
-    const titles = blogsAfter.map((tmp) => tmp.title);
-    expect(titles).not.toContain(firstBlog.title);
+      const blogsAfter = await listHelper.blogsInDB();
+      const updatedBlog = lodash.first(blogsAfter);
+      expect(updatedBlog.likes).toBe(666);
+    });
   });
 });
 

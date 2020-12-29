@@ -20,7 +20,7 @@ mongoose.connect(mongoUrl, {
 
 app.use(cors());
 app.use(express.json());
-app.use('/api', blogsRouter);
 app.use(requestLogger);
+app.use('/api/blogs', blogsRouter);
 app.use(errorHandler);
 module.exports = app;
