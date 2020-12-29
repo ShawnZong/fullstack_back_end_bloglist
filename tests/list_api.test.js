@@ -22,9 +22,18 @@ describe('api test when feed in some initial blogs', () => {
       .expect(200)
       .expect('Content-Type', /application\/json/);
   });
+
   test.only('the right amount of blogs are returned', async () => {
     const response = await api.get('/api/blogs');
+    // console.log(response.body);
     expect(response.body.length).toBe(listHelper.initialBlogs.length);
+  });
+
+  test.only('there is a property named id', async () => {
+    const response = await api.get('/api/blogs');
+    response.body.forEach((blog) => {
+      expect(blog.id).toBeDefined();
+    });
   });
 });
 afterAll(() => {
