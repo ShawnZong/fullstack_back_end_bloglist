@@ -3,7 +3,6 @@ const supertest = require('supertest');
 const listHelper = require('../utils/list_helper');
 const app = require('../app');
 const Blog = require('../models/blog');
-const lodash = require('lodash');
 
 const api = supertest(app);
 
@@ -24,7 +23,7 @@ describe('api test when feed in some initial blogs', () => {
       .expect('Content-Type', /application\/json/);
   });
 
-  test.only('the right amount of blogs are returned', async () => {
+  test('the right amount of blogs are returned', async () => {
     const response = await api.get('/api/blogs');
     // console.log(response.body);
     expect(response.body.length).toBe(listHelper.initialBlogs.length);
@@ -38,7 +37,7 @@ describe('api test when feed in some initial blogs', () => {
   });
 });
 describe('api test, post a blog', () => {
-  test.only('post a new blog', async () => {
+  test('post a new blog', async () => {
     const newBlog = {
       title: 'React patterns',
       author: 'Michael Chan',
@@ -59,7 +58,7 @@ describe('api test, post a blog', () => {
     expect(titles).toContain('React patterns');
   });
 
-  test.only('default likes should be 0', async () => {
+  test('default likes should be 0', async () => {
     const newBlog = {
       title: 'React patterns',
       author: 'Michael Chan',
@@ -67,6 +66,13 @@ describe('api test, post a blog', () => {
     };
     const response = await api.post('/api/blogs').send(newBlog);
     expect(response.body.likes).toBe(0);
+  });
+
+  test('title and url are required', async () => {
+    const newBlog = {
+      url: 'https://reactpatterns.com/',
+    };
+    await api.post('/api/blogs').send(newBlog).expect(400);
   });
 });
 afterAll(() => {
