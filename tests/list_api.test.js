@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const supertest = require('supertest');
+const lodash = require('lodash');
 const listHelper = require('../utils/list_helper');
 const app = require('../app');
 const Blog = require('../models/blog');
@@ -36,6 +37,7 @@ describe('api test when feed in some initial blogs', () => {
     });
   });
 });
+
 describe('api test, post a blog', () => {
   test('post a new blog', async () => {
     const newBlog = {
@@ -75,6 +77,22 @@ describe('api test, post a blog', () => {
     await api.post('/api/blogs').send(newBlog).expect(400);
   });
 });
+
+describe.only('api test delete a blog', () => {
+  test('delete the first blog', async () => {
+    const blogsBefore = await listHelper.blogsInDB();
+    const firstBlog = lodash.first(blogsBefore);
+    await api.delete(`/api/blogs/${firstBlog.id}`);
+    expect(204);
+
+    const blogsAfter = await listHelper.blogsInDB();
+    expect(blogsAfter.length).toBe(listHelper.initialBlogs.length - 1);
+
+    const titles = blogsAfter.map((tmp) => tmp.title);
+    expect(titles).not.toContain(firstBlog.title);
+  });
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
