@@ -1,4 +1,5 @@
 const express = require('express');
+require('express-async-errors');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const config = require('./utils/config');
@@ -9,6 +10,7 @@ const app = express();
 
 // const mongoUrl = 'mongodb://localhost/bloglist'
 const mongoUrl = config.MONGODB_URL;
+
 mongoose.connect(mongoUrl, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
