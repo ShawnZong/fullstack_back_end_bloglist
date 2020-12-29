@@ -10,7 +10,14 @@ userRouter.get('/', async (request, response) => {
 
 userRouter.post('/', async (request, response) => {
   const userTmp = request.body;
-
+  if (userTmp.password === undefined) {
+    return response.status(400).json({ error: 'password mising' });
+  }
+  if (userTmp.password.length < 3) {
+    return response
+      .status(400)
+      .json({ error: 'password must be at least 3 characters long' });
+  }
   const saltRounds = 10;
   userTmp.password = await bcrypt.hash(userTmp.password, saltRounds);
 

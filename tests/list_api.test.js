@@ -134,23 +134,53 @@ describe('users', () => {
     expect(response.body.length).toBe(userHelper.initialUsers.length);
   });
 
-  test.only('post a user', async () => {
-    const newUser = {
-      username: 'test',
-      password: '1',
-      name: 'aalto',
-    };
-    await api
-      .post('/api/users')
-      .send(newUser)
-      .expect(201)
-      .expect('Content-Type', /application\/json/);
+  describe.only('post a user', () => {
+    test(' with correct info', async () => {
+      const newUser = {
+        username: 'test',
+        password: '111',
+        name: 'aalto',
+      };
+      await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(201)
+        .expect('Content-Type', /application\/json/);
 
-    const users = await userHelper.usersInDB();
-    expect(users.length).toBe(userHelper.initialUsers.length + 1);
+      const users = await userHelper.usersInDB();
+      expect(users.length).toBe(userHelper.initialUsers.length + 1);
 
-    const usernames = users.map((tmp) => tmp.username);
-    expect(usernames).toContain('test');
+      const usernames = users.map((tmp) => tmp.username);
+      expect(usernames).toContain('test');
+    });
+    test('with wrong username', async () => {
+      const newUser = {
+        username: '1',
+        password: '111',
+        name: 'aalto',
+      };
+      await api.post('/api/users').send(newUser).expect(400);
+
+      delete newUser.username;
+      await api.post('/api/users').send(newUser).expect(400);
+    });
+    test('with wrong password', async () => {
+      const newUser = {
+        username: '1',
+        password: '1',
+        name: 'aalto',
+      };
+      await api.post('/api/users').send(newUser).expect(400);
+
+      delete newUser.password;
+      await api.post('/api/users').send(newUser).expect(400);
+    });
+  });
+  test('with duplicate username', async () => {
+    const existedUsers = await userHelper.usersInDB();
+    const firstUser = lodash.first(existedUsers);
+    // console.log('existed users', existedUsers);
+    await api.post('/api/users').send(firstUser).expect(400);
   });
 });
 afterAll(() => {
