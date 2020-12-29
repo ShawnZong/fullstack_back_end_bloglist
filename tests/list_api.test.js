@@ -2,18 +2,27 @@ const mongoose = require('mongoose');
 const supertest = require('supertest');
 const lodash = require('lodash');
 const listHelper = require('../utils/list_helper');
+const userHelper = require('../utils/user_helper');
 const app = require('../app');
 const Blog = require('../models/blog');
-
+const User = require('../models/user');
 const api = supertest(app);
 
 beforeEach(async () => {
   await Blog.deleteMany({});
   // eslint-disable-next-line no-restricted-syntax
   for (const blog of listHelper.initialBlogs) {
-    const blogObject = new Blog(blog);
+    const blogObj = new Blog(blog);
     // eslint-disable-next-line no-await-in-loop
-    await blogObject.save();
+    await blogObj.save();
+  }
+
+  await User.deleteMany({});
+  // eslint-disable-next-line no-restricted-syntax
+  for (const user of userHelper.initialUsers) {
+    const userObj = new User(user);
+    // eslint-disable-next-line no-await-in-loop
+    await userObj.save();
   }
 });
 describe('api test when feed in some initial blogs', () => {
@@ -111,7 +120,39 @@ describe('single api test', () => {
     });
   });
 });
+describe('users', () => {
+  test('users are returned as json', async () => {
+    await api
+      .get('/api/users')
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+  });
 
+  test('the right amount of users are returned', async () => {
+    const response = await api.get('/api/users');
+    // console.log(response.body);
+    expect(response.body.length).toBe(userHelper.initialUsers.length);
+  });
+
+  test.only('post a user', async () => {
+    const newUser = {
+      username: 'test',
+      password: '1',
+      name: 'aalto',
+    };
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(201)
+      .expect('Content-Type', /application\/json/);
+
+    const users = await userHelper.usersInDB();
+    expect(users.length).toBe(userHelper.initialUsers.length + 1);
+
+    const usernames = users.map((tmp) => tmp.username);
+    expect(usernames).toContain('test');
+  });
+});
 afterAll(() => {
   mongoose.connection.close();
 });
