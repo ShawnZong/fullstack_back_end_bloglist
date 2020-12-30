@@ -1,7 +1,8 @@
+/* eslint-disable consistent-return */
 const userRouter = require('express').Router();
-const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const User = require('../models/user');
 
 userRouter.get('/', async (request, response) => {
   const users = await User.find({}).populate('blogs', {

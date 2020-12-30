@@ -1,8 +1,17 @@
+const config = require('../utils/config');
 const blogsRouter = require('express').Router();
+const lodash = require('lodash');
 const Blog = require('../models/blog');
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
-const lodash = require('lodash');
+
+const getTokenFromHeader = (request) => {
+  const authorization = request.get('authorization');
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    return authorization.substring(7);
+  }
+  return null;
+};
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', {
@@ -13,22 +22,30 @@ blogsRouter.get('/', async (request, response) => {
 });
 
 blogsRouter.post('/', async (request, response) => {
+  const token = getTokenFromHeader(request);
+  const decodedToken = jwt.verify(token, config.SECRET);
+  if (!token || !decodedToken.id) {
+    return response
+      .status(401)
+      .json({ error: 'token missing or invalid token' });
+  }
+  console.log(decodedToken);
+  const user = await User.findById(decodedToken.id);
+  console.log('user', user);
   const blogTmp = request.body;
   if (!blogTmp.likes) {
     blogTmp.likes = 0;
   }
-  const users = await User.find({});
-  const firstUser = lodash.first(users);
 
   // eslint-disable-next-line no-underscore-dangle
-  blogTmp.user = firstUser._id;
+  blogTmp.user = user._id;
 
   const blog = new Blog(blogTmp);
   const savedBlog = await blog.save();
 
   // eslint-disable-next-line no-underscore-dangle
-  firstUser.blogs = firstUser.blogs.concat(savedBlog._id);
-  await firstUser.save();
+  user.blogs = user.blogs.concat(savedBlog._id);
+  await user.save();
 
   response.status(201).json(savedBlog.toJSON());
 });
