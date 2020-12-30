@@ -1,7 +1,7 @@
 /* eslint-disable consistent-return */
 const userRouter = require('express').Router();
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const config = require('../utils/config');
 const User = require('../models/user');
 
 userRouter.get('/', async (request, response) => {
@@ -31,8 +31,7 @@ userRouter.post('/', async (request, response) => {
       .status(400)
       .json({ error: 'password must be at least 3 characters long' });
   }
-  const saltRounds = 10;
-  userTmp.password = await bcrypt.hash(userTmp.password, saltRounds);
+  userTmp.password = await bcrypt.hash(userTmp.password, config.saltRounds);
 
   const user = new User(userTmp);
   const savedUser = await user.save();
