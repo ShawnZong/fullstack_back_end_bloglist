@@ -4,7 +4,11 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
 userRouter.get('/', async (request, response) => {
-  const users = await User.find({});
+  const users = await User.find({}).populate('blogs', {
+    title: true,
+    author: true,
+    url: true,
+  });
   return response.json(users.map((user) => user.toJSON()));
 });
 

@@ -1,9 +1,14 @@
 const blogsRouter = require('express').Router();
 const Blog = require('../models/blog');
+const User = require('../models/user');
 const jwt = require('jsonwebtoken');
+const lodash = require('lodash');
 
 blogsRouter.get('/', async (request, response) => {
-  const blogs = await Blog.find({});
+  const blogs = await Blog.find({}).populate('user', {
+    username: true,
+    name: true,
+  });
   response.json(blogs.map((blog) => blog.toJSON()));
 });
 
@@ -12,9 +17,19 @@ blogsRouter.post('/', async (request, response) => {
   if (!blogTmp.likes) {
     blogTmp.likes = 0;
   }
-  const blog = new Blog(blogTmp);
+  const users = await User.find({});
+  const firstUser = lodash.first(users);
 
+  // eslint-disable-next-line no-underscore-dangle
+  blogTmp.user = firstUser._id;
+
+  const blog = new Blog(blogTmp);
   const savedBlog = await blog.save();
+
+  // eslint-disable-next-line no-underscore-dangle
+  firstUser.blogs = firstUser.blogs.concat(savedBlog._id);
+  await firstUser.save();
+
   response.status(201).json(savedBlog.toJSON());
 });
 
