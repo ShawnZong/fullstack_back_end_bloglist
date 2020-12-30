@@ -12,6 +12,14 @@ userRouter.get('/', async (request, response) => {
   });
   return response.json(users.map((user) => user.toJSON()));
 });
+userRouter.get('/:id', async (request, response) => {
+  const user = await User.findById(request.params.id).populate('blogs', {
+    title: true,
+    author: true,
+    url: true,
+  });
+  return response.json(user.toJSON());
+});
 
 userRouter.post('/', async (request, response) => {
   const userTmp = request.body;
