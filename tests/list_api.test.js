@@ -10,7 +10,7 @@ const Blog = require('../models/blog');
 const User = require('../models/user');
 
 const api = supertest(app);
-let authorizationHeaderTmp;
+// let authorizationHeaderTmp;
 beforeEach(async () => {
   await User.deleteMany({});
   // eslint-disable-next-line no-restricted-syntax
@@ -37,15 +37,15 @@ beforeEach(async () => {
     // eslint-disable-next-line no-await-in-loop
     await blogObj.save();
 
-    const firstUserOriginal = lodash.first(userHelper.initialUsers);
-    // eslint-disable-next-line no-await-in-loop
-    // set authorization
-    // eslint-disable-next-line no-await-in-loop
-    const auResponse = await api.post('/api/login').send({
-      username: firstUserOriginal.username,
-      password: firstUserOriginal.password,
-    });
-    authorizationHeaderTmp = `bearer ${auResponse.body.token}`;
+    // const firstUserOriginal = lodash.first(userHelper.initialUsers);
+    // // eslint-disable-next-line no-await-in-loop
+    // // set authorization
+    // // eslint-disable-next-line no-await-in-loop
+    // const auResponse = await api.post('/api/login').send({
+    //   username: firstUserOriginal.username,
+    //   password: firstUserOriginal.password,
+    // });
+    // authorizationHeaderTmp = `bearer ${auResponse.body.token}`;
   }
 });
 
@@ -71,6 +71,18 @@ describe('api test when feed in some initial blogs', () => {
 });
 
 describe('single api test', () => {
+  let authorizationHeaderTmp;
+  beforeEach(async () => {
+    const firstUserOriginal = lodash.first(userHelper.initialUsers);
+    // eslint-disable-next-line no-await-in-loop
+    // set authorization
+    // eslint-disable-next-line no-await-in-loop
+    const auResponse = await api.post('/api/login').send({
+      username: firstUserOriginal.username,
+      password: firstUserOriginal.password,
+    });
+    authorizationHeaderTmp = `bearer ${auResponse.body.token}`;
+  });
   describe('api test, post a blog', () => {
     test('post a new blog', async () => {
       const newBlog = {

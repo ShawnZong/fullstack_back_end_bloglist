@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 // eslint-disable-next-line import/order
 const config = require('../utils/config');
 const jwt = require('jsonwebtoken');
@@ -16,12 +17,12 @@ loginRouter.post('/', async (request, response) => {
   }
 
   const token = jwt.sign(
-    // eslint-disable-next-line no-underscore-dangle
     { username: user.username, id: user._id },
     config.SECRET,
   );
   return response.status(200).send({
     token,
+    id: user._id,
     username: user.username,
     name: user.name,
   });
