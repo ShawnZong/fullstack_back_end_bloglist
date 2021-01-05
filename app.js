@@ -27,5 +27,10 @@ app.use(middleware.tokenExtractor);
 app.use('/api/login', loginRouter);
 app.use('/api/blogs', blogsRouter);
 app.use('/api/users', userRouter);
+if (process.env.NODE_ENV === 'test') {
+  // eslint-disable-next-line global-require
+  const testingRouter = require('./controllers/testing');
+  app.use('/api/testing', testingRouter);
+}
 app.use(middleware.errorHandler);
 module.exports = app;
